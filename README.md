@@ -42,6 +42,22 @@ data, no half-documented glue scripts. If you can copy-paste, you can reproduce 
 
 ---
 
+## 🗓️ Milestones
+
+Where we are, and where we're headed — we'd love your help ticking more of these off! 🎉
+
+- [x] 🚀 Release **ComprExIT** — method + two-phase training (NTP → SFT) & evaluation code
+- [x] 🧩 Add the **ICAE** baseline (`--model_structure icae`)
+- [x] 🧩 Add the **500x** baseline (`--model_structure 500x`)
+- [x] 🧩 Add the **Activation Beacon** baseline
+- [x] 🤗 Upload **datasets** to HuggingFace
+- [x] 🤗 Upload **checkpoints / weights** to HuggingFace
+- [x] 🧬 Add the **SAC** implementation (`--model_structure sac`; experimental, 1B-only)
+- [ ] 🔭 Add more compression-method implementations
+- [ ] 💬 *Your idea here* — open an issue or PR!
+
+---
+
 ## Quick start: step-by-step reproduction
 
 A guided walkthrough from a fresh clone to reproduced numbers. **Do [Step 0](#step-0-one-time-setup)
@@ -292,22 +308,6 @@ Two kinds of paths, handled differently:
 > `src/evaluation/utils_eval.py`) — needs that environment. See
 > [`src/baselines/activation_beacon/README.md`](src/baselines/activation_beacon/README.md) for
 > its setup and usage.
-
----
-
-## 🗓️ Milestones
-
-Where we are, and where we're headed — we'd love your help ticking more of these off! 🎉
-
-- [x] 🚀 Release **ComprExIT** — method + two-phase training (NTP → SFT) & evaluation code
-- [x] 🧩 Add the **ICAE** baseline (`--model_structure icae`)
-- [x] 🧩 Add the **500x** baseline (`--model_structure 500x`)
-- [x] 🧩 Add the **Activation Beacon** baseline
-- [x] 🤗 Upload **datasets** to HuggingFace
-- [x] 🤗 Upload **checkpoints / weights** to HuggingFace
-- [x] 🧬 Add the **SAC** implementation (`--model_structure sac`; experimental, 1B-only)
-- [ ] 🔭 Add more compression-method implementations
-- [ ] 💬 *Your idea here* — open an issue or PR!
 
 ---
 
