@@ -296,6 +296,19 @@ Two kinds of paths, handled differently:
 > matching `[[tool.uv.index]]` / `[tool.uv.sources]` block in `pyproject.toml` and re-run
 > `uv lock && uv sync` (or see [pytorch.org](https://pytorch.org)).
 
+> **Attention backend (flash-attn is optional).** `uv sync` does **not** install `flash_attn` — it
+> is only needed by the Activation Beacon baseline. The training scripts request
+> `flash_attention_2` for speed, but when it isn't importable the code automatically falls back to
+> the `eager` backend (you'll see a one-line warning), so the default environment runs out of the
+> box. For higher throughput, install flash-attn separately (e.g. `uv pip install flash-attn
+> --no-build-isolation`) or pass `--attn_implementation eager` explicitly to silence the warning.
+> Note the ComprExIT compressor does not support the `sdpa` backend — use `flash_attention_2` or
+> `eager`.
+
+> **Weights & Biases is optional.** Training logs to W&B if credentials are present (`wandb login`
+> or `WANDB_API_KEY`). With no credentials the run auto-disables reporting (one-line warning)
+> instead of failing; pass `--report_to none` to opt out explicitly.
+
 > **Want a plain `requirements.txt`?** `pyproject.toml` + `uv.lock` are the source of truth. For
 > a pip-style requirements file (e.g. a different toolchain), run
 > `uv export --format requirements-txt > requirements.txt`.

@@ -1,3 +1,4 @@
+import importlib.util
 import torch
 from typing import Optional
 try:
@@ -7,12 +8,17 @@ except ImportError:
 
 
 def supports_flash_attention_2(device: Optional[int] = None) -> bool:
+    # A supported GPU is not enough -- the `flash_attn` package must also be importable.
+    # `uv sync` does not install flash-attn (it is only required by the Activation Beacon
+    # baseline), so on the default environment we report False and let callers fall back.
+    if importlib.util.find_spec("flash_attn") is None:
+        return False
     if not torch.cuda.is_available():
         return False
     if device is None:
         device = torch.cuda.current_device()
     major, minor = torch.cuda.get_device_capability(device)
-    return major >= 8  # Ampere+ (SM80+
+    return major >= 8  # Ampere+ (SM80+)
 
 def get_device_module():
     # Determine device module

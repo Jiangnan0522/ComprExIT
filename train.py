@@ -57,7 +57,7 @@ from src.data_processing.ntp_preprocessing import GistDataProcessor, get_data_co
 from src.data_processing.sft_preprocessing import SFTDataProcessor, DataCollatorForSFT, DataCollatorForSFTBaseModel
 from src.model.model import get_model_factory, get_model_factory_from_config
 from src.training import CompressInTrainer, LoguruCallback, DeviceUsageCallback
-from src.device_utils import get_device_module
+from src.device_utils import get_device_module, supports_flash_attention_2
 
 
 # Will error if the minimal version of Transformers is not installed. Remove at your own risks.
@@ -363,6 +363,28 @@ def split_streaming_dataset(
 
 
 
+def _wandb_credentials_available() -> bool:
+    """Best-effort, offline check for whether Weights & Biases can run unattended.
+
+    Returns True when W&B will not block on a login prompt: an explicit
+    offline/dryrun mode, a ``WANDB_API_KEY``, or a stored ``wandb login`` (netrc
+    entry). An explicit ``WANDB_DISABLED=true`` counts as unavailable so we drop the
+    wandb integration entirely -- on recent ``transformers`` that env var otherwise
+    hard-conflicts with ``report_to='wandb'`` and aborts training.
+    """
+    if os.environ.get("WANDB_DISABLED", "").lower() == "true":
+        return False
+    if os.environ.get("WANDB_MODE", "").lower() in {"offline", "dryrun"}:
+        return True
+    if os.environ.get("WANDB_API_KEY"):
+        return True
+    try:
+        import netrc
+        return any("wandb" in host for host in netrc.netrc().hosts)
+    except Exception:
+        return False
+
+
 def main():
     # See all possible arguments in src/transformers/training_args.py
     # or by passing the --help flag to this script.
@@ -375,6 +397,32 @@ def main():
         model_args, data_args, training_args = parser.parse_json_file(json_file=os.path.abspath(sys.argv[1]))
     else:
         model_args, data_args, training_args = parser.parse_args_into_dataclasses()
+
+    # --- Graceful fallback: FlashAttention-2 is optional ---
+    # `uv sync` does not install flash-attn (only the Activation Beacon baseline needs
+    # it). The compressor architecture does not support the `sdpa` backend, so when FA2
+    # is unavailable we fall back to `eager` instead of crashing at model load.
+    if model_args.attn_implementation == "flash_attention_2" and not supports_flash_attention_2():
+        logger.warning(
+            "attn_implementation='flash_attention_2' was requested but is unavailable "
+            "(flash-attn not installed or unsupported GPU); falling back to 'eager'. "
+            "Install flash-attn for higher throughput, or pass --attn_implementation explicitly to silence this."
+        )
+        model_args.attn_implementation = "eager"
+
+    # --- Graceful fallback: Weights & Biases is optional ---
+    # The Trainer aborts if report_to includes 'wandb' but there is no API key / login.
+    # If W&B is requested without usable credentials, disable reporting rather than crash.
+    # Run `wandb login` or set WANDB_API_KEY to enable experiment tracking.
+    report_to = training_args.report_to
+    report_to = [report_to] if isinstance(report_to, str) else list(report_to)
+    if "wandb" in report_to and not _wandb_credentials_available():
+        logger.warning(
+            "report_to includes 'wandb' but no W&B credentials were found "
+            "(no WANDB_API_KEY and no `wandb login`); disabling experiment reporting. "
+            "Run `wandb login` or set WANDB_API_KEY to enable it, or pass --report_to none to silence this."
+        )
+        training_args.report_to = []
 
     # Add Liger Kernel support
     if device_type == 'cuda':
