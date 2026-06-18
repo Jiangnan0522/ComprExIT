@@ -16,7 +16,7 @@ from datasets import load_dataset, DatasetDict
 from src.evaluation.metrics import MetricsFactory
 from src.model.inference import compressing_predict_with_question_and_context, beacon_predict, base_model_predict, base_model_predict_single, base_model_predict_batch
 from src.data_processing.sft_datasets import SFTDatasetBase
-from src.data_processing.prompte_template import QATemplate
+from src.data_processing.prompt_template import QATemplate
 
 
 class Evaluator:

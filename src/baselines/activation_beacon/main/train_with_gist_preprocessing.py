@@ -36,7 +36,7 @@ from src.trainer import ActivationBeaconTrainer
 from data_processing.ntp_preprocessing import GistDataProcessor
 from data_processing.sft_preprocessing import SFTDataProcessor
 from data_processing.data_loading import data_loading_factory, sft_data_loading_factory
-from data_processing.prompte_template import QATemplate
+from data_processing.prompt_template import QATemplate
 
 PAD_TOKEN = "<pad>"
 

@@ -12,7 +12,7 @@ from transformers import AutoTokenizer
 import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
-from .prompte_template import QATemplate
+from .prompt_template import QATemplate
 from model.modelling_utils import move_padding_to
 
 
