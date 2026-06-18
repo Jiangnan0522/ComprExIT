@@ -1,0 +1,34 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.ipynb_checkpoints/
+.pytest_cache/
+
+# Core dumps / logs
+core
+core.*
+*.log
+
+# Local environment
+.env
+
+# Author-side upload tooling (internal; embeds local paths — not for release)
+hf_upload*.py
+
+# uv / virtualenv (commit uv.lock, ignore the resolved venv)
+.venv/
+
+# Datasets & model checkpoints (download / train locally)
+data/
+datasets/
+checkpoints/
+checkpoints_path_to_upload.md
+
+# Experiment / evaluation outputs
+wandb/
+test/
+legacies/
+
+# Probe intermediate artifacts & generated plots
+outputs/

@@ -1,0 +1,72 @@
+[project]
+name = "comprexit"
+version = "0.1.0"
+description = "ComprExIT: Context Compression via Explicit Information Transmission"
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.9,<3.13"
+
+# Pinned to the versions used for the paper experiments.
+# NOTE: the default PyPI `torch` wheel on Linux x86_64 bundles a CUDA 12.x build
+# (works on the H100 / most NVIDIA GPUs). For CPU-only or a different CUDA
+# version, see the torch override note in the README / [tool.uv.sources] below.
+dependencies = [
+    # Core ML stack
+    "torch==2.8.0",
+    "transformers==4.57.3",
+    "datasets==4.4.2",
+    "accelerate==1.10.1",
+    "peft==0.17.1",
+    "liger-kernel==0.6.4",
+    "tokenizers==0.22.2",
+    "safetensors==0.7.0",
+    "huggingface-hub==0.36.0",
+    "sentencepiece==0.2.1",
+    "overrides==7.7.0",
+    # Numerics / data
+    "numpy==2.0.2",
+    "pandas==2.3.3",
+    "scipy==1.13.1",
+    "scikit-learn==1.6.1",
+    "tqdm==4.67.3",
+    # Evaluation metrics
+    "evaluate==0.4.6",
+    "rouge==1.0.1",
+    "rouge-score==0.1.2",
+    # Logging / experiment tracking
+    "loguru==0.7.3",
+    "wandb==0.23.1",
+]
+
+[project.optional-dependencies]
+# Plotting deps, only needed to reproduce the paper figures:
+#   uv sync --extra viz
+viz = [
+    "matplotlib==3.9.4",
+    "seaborn==0.13.2",
+]
+
+[tool.uv]
+# This is an application run from the repo root (code imports `from src...`
+# as an implicit namespace package), not an installable library — so don't
+# try to build/install the project itself into the environment.
+package = false
+
+# To pull torch from a specific CUDA / CPU index instead of the default PyPI
+# wheel, uncomment one of the blocks below and run `uv lock && uv sync`.
+#
+# CPU-only:
+#   [[tool.uv.index]]
+#   name = "pytorch-cpu"
+#   url = "https://download.pytorch.org/whl/cpu"
+#   explicit = true
+#   [tool.uv.sources]
+#   torch = { index = "pytorch-cpu" }
+#
+# CUDA 12.1 (example):
+#   [[tool.uv.index]]
+#   name = "pytorch-cu121"
+#   url = "https://download.pytorch.org/whl/cu121"
+#   explicit = true
+#   [tool.uv.sources]
+#   torch = { index = "pytorch-cu121" }

@@ -1,0 +1,46 @@
+{
+  "model_name_or_path": "meta-llama/Llama-2-7b-hf",
+  "train_data": ["data/train.json"],
+  "eval_data": "data/eval.json",
+  "output_dir": "outputs/beacon_with_gist",
+  
+  "enable_beacon": true,
+  "beacon_window": 1024,
+  "beacon_stride": 512,
+  "beacon_ratio": [2, 4, 8],
+  "beacon_attn": "step-expansion",
+  "only_train_beacon": true,
+  
+  "max_length": 4096,
+  "context_length": 2048,
+  "generation_length": 2048,
+  "ntp_ratio": 1.0,
+  
+  "streaming": true,
+  "max_tokens": [3000, 100],
+  "preprocessing_num_workers": null,
+  "overwrite_cache": false,
+  
+  "per_device_train_batch_size": 2,
+  "per_device_eval_batch_size": 2,
+  "gradient_accumulation_steps": 8,
+  "num_train_epochs": 1,
+  "learning_rate": 1e-4,
+  "weight_decay": 0.01,
+  "warmup_ratio": 0.03,
+  "lr_scheduler_type": "cosine",
+  
+  "bf16": true,
+  "tf32": true,
+  "gradient_checkpointing": true,
+  
+  "logging_steps": 50,
+  "save_steps": 500,
+  "eval_steps": 500,
+  "save_total_limit": 3,
+  
+  "seed": 42,
+  "dataloader_num_workers": 4,
+  "remove_unused_columns": false,
+  "report_to": "none"
+}
