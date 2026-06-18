@@ -95,7 +95,6 @@ scripts/
   llama-3.2/
     ntp/ ntp_3b/                 # NTP pretraining (1B / 3B) for each method
     sft/ sft_3b/                 # supervised fine-tuning (1B / 3B) for each method
-    ablations/                   # Table 3 ablations (coordinated allocation, layer aggregation)
 configs/                         # config templates
 ```
 
