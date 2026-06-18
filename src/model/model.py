@@ -1918,7 +1918,7 @@ class SAC(EncoderDecoderCompressorBase):
     Compresses context by uniformly subsampling token positions, adding learnable role tokens,
     and passing the resulting KV cache (with bidirectional attention) to a frozen decoder.
 
-    Reference: original SAC implementation at src/baselines/SAC/model/modeling.py
+    Native reimplementation of the SAC (Semantic Anchors for Context Compression) method.
     """
     config_class = SACConfig
 

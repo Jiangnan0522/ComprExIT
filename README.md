@@ -280,7 +280,6 @@ If you find this work useful, please cite:
       url={https://arxiv.org/abs/2602.03784}, 
 }
 ```
-<!-- TODO(release): fill in the author list. -->
 
 ## License
 
