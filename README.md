@@ -13,8 +13,7 @@ globally-coordinated, controllable aggregation.
 
 > **Method-name map.** In the paper the method is called **ComprExIT**. In the code it is
 > selected with `--model_structure hier --pooling_method ot-dy-src` (the Optimal-Transport
-> dynamic-source pooling that realises the width-wise transmission plan). The repository
-> package is historically named `CompressIn`; the two names refer to the same project.
+> dynamic-source pooling that realises the width-wise transmission plan).
 
 ---
 
