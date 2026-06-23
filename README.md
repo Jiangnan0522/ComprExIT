@@ -74,8 +74,7 @@ At a glance — one shared setup, then two independent tracks:
                        ┌──────────────────────────┴──────────────────────────┐
                        │                                                     │
    ┌──────────────────────────────────────┐              ┌──────────────────────────────────────┐
-   │  Track A · Evaluate                  │              │  Track B · Train                     │
-   │  released weights                    │              │  from scratch                        │
+   │  Track A · Evaluate released weights │              │  Track B · Train from scratch        │
    │  (minutes, no training)              │              │  (a full NTP -> SFT run)             │
    ├──────────────────────────────────────┤              ├──────────────────────────────────────┤
    │  A.1  download a checkpoint          │              │  B.1  get base + datasets            │
