@@ -106,7 +106,7 @@ the template and edit:
 
 ```bash
 cp .env.example .env
-#   DATA_DIR   → where datasets are stored
+#   DATA_DIR   → where datasets will be stored
 #   OUTPUT_DIR → where training writes checkpoints/logs (default ./training_outputs)
 ```
 
