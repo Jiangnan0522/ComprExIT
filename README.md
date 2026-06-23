@@ -66,23 +66,23 @@ once**, then pick the track that matches your goal:
 At a glance — one shared setup, then two independent tracks:
 
 ```
-                    ┌────────────────────────────────────┐
-                    │      Step 0 · one-time setup       │
-                    │  uv sync  ·  cp .env.example .env  │
-                    └────────────────────────────────────┘
-                                       │
-                   ┌───────────────────┴────────────────────┐
-                   │                                        │
-   ┌──────────────────────────────┐         ┌──────────────────────────────┐
-   │  Track A · Evaluate          │         │  Track B · Train             │
-   │  released weights            │         │  from scratch                │
-   │  (minutes, no training)      │         │  (a full NTP -> SFT run)     │
-   ├──────────────────────────────┤         ├──────────────────────────────┤
-   │  A.1  download a checkpoint  │         │  B.1  get base + datasets    │
-   │  A.2  download MRQA data     │         │  B.2  NTP pretraining        │
-   │  A.3  run evaluation         │         │  B.3  SFT on MRQA            │
-   │                              │         │  B.4  evaluate               │
-   └──────────────────────────────┘         └──────────────────────────────┘
+                           ┌────────────────────────────────────────────┐
+                           │          Step 0 · one-time setup           │
+                           │      uv sync  ·  cp .env.example .env      │
+                           └────────────────────────────────────────────┘
+                                                  │
+                       ┌──────────────────────────┴──────────────────────────┐
+                       │                                                     │
+   ┌──────────────────────────────────────┐              ┌──────────────────────────────────────┐
+   │  Track A · Evaluate                  │              │  Track B · Train                     │
+   │  released weights                    │              │  from scratch                        │
+   │  (minutes, no training)              │              │  (a full NTP -> SFT run)             │
+   ├──────────────────────────────────────┤              ├──────────────────────────────────────┤
+   │  A.1  download a checkpoint          │              │  B.1  get base + datasets            │
+   │  A.2  download MRQA data             │              │  B.2  NTP pretraining                │
+   │  A.3  run evaluation                 │              │  B.3  SFT on MRQA                    │
+   │                                      │              │  B.4  evaluate                       │
+   └──────────────────────────────────────┘              └──────────────────────────────────────┘
 ```
 
 > Track B ends by reusing **Track A.3** to score your freshly trained checkpoint.
