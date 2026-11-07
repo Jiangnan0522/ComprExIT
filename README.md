@@ -1,15 +1,97 @@
-# ComprExIT: Context Compression via Explicit Information Transmission
+<div align="center">
 
-Official implementation of **ComprExIT**, a lightweight framework for *soft* context
-compression in Large Language Models. Instead of re-purposing the LLM as a trainable
-compressor that aggregates context through layer-by-layer self-attention, ComprExIT
-formulates compression as **explicit information transmission over frozen LLM hidden
-states**, performing coordinated **depth-wise** (inter-layer) and **width-wise**
-(token-to-slot) transmission. This decouples compression from the model's internal
-self-attention dynamics, mitigating progressive representation overwriting and enabling
-globally-coordinated, controllable aggregation.
+# ComprExIT
 
-📄 **Paper:** [Fix the Structural Bottleneck: Context Compression via Explicit Information Transmission](https://arxiv.org/abs/2602.03784)
+### Fix the Structural Bottleneck: Context Compression via Explicit Information Transmission
+
+**NeurIPS 2026**
+
+Jiangnan Ye<sup>1</sup>, Hanqi Yan<sup>1,\*</sup>, Zhenyi Shen<sup>1</sup>, Heng Chang<sup>2</sup>, Ye Mao<sup>3</sup>, Yulan He<sup>1,4,\*</sup>
+
+<sup>1</sup>King's College London &nbsp;&nbsp; <sup>2</sup>Unity China &nbsp;&nbsp; <sup>3</sup>Imperial College London &nbsp;&nbsp; <sup>4</sup>The Alan Turing Institute
+<br><sup>\*</sup>Corresponding authors
+
+[![NeurIPS 2026](https://img.shields.io/badge/NeurIPS-2026-6f42c1.svg)](https://neurips.cc/Conferences/2026)
+[![arXiv](https://img.shields.io/badge/arXiv-2602.03784-b31b1b.svg)](https://arxiv.org/abs/2602.03784)
+[![Checkpoints](https://img.shields.io/badge/%F0%9F%A4%97%20HuggingFace-Checkpoints-ffd21e.svg)](https://huggingface.co/collections/Jiang-nan/comprexit-6a340cd07b4f45c96fc6da65)
+[![Datasets](https://img.shields.io/badge/%F0%9F%A4%97%20HuggingFace-Datasets-ffd21e.svg)](https://huggingface.co/datasets/Jiang-nan/comprexit-mrqa)
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
+
+[**News**](#-news) · [**Overview**](#-overview) · [**Highlights**](#-highlights) · [**Quick start**](#quick-start-step-by-step-reproduction) · [**Checkpoints**](#released-checkpoints) · [**Citation**](#citation)
+
+</div>
+
+<p align="center">
+  <img src="assets/framework.png" alt="Existing LLM-as-a-compressor methods (left) versus ComprExIT (right)" width="100%">
+</p>
+<p align="center"><sub><b>Left:</b> existing LLM-as-a-compressor methods encode gist tokens layer by layer through the LLM's own self-attention.
+<b>Right:</b> ComprExIT reads the hidden states of a <i>frozen</i> LLM, selectively aggregates them across layers into token anchors (depth-wise),
+then transmits the anchors to compression slots through a globally coordinated plan (width-wise).</sub></p>
+
+## 📰 News
+
+- **[2026-09]** 🎉 ComprExIT has been accepted to **NeurIPS 2026**!
+- **[2026-06]** 🚀 Code, released checkpoints and preprocessed datasets are public — see the [🤗 collection](https://huggingface.co/collections/Jiang-nan/comprexit-6a340cd07b4f45c96fc6da65).
+- **[2026-02]** 📄 Paper released on [arXiv](https://arxiv.org/abs/2602.03784).
+
+## 🔍 Overview
+
+**ComprExIT** (Context **Compr**ession via **Ex**plicit **I**nformation **T**ransmission) is a
+lightweight framework for *soft* context compression: it condenses a long context into a small
+set of continuous compression tokens that the LLM reads in place of the original text.
+
+Most soft compressors follow the **LLM-as-a-compressor** paradigm — learnable gist tokens are
+appended to the context and the LLM is tuned to pack the context into them through its own
+self-attention. Tracing how information flows inside such a compressor, we find two structural
+bottlenecks:
+
+- **Width: lack of allocation.** Each gist token gathers information independently, without
+  coordinating with the others, so several of them collapse onto the same salient regions while
+  other parts of the context stay under-covered.
+- **Depth: information dilution.** Information propagates layer by layer, so fine-grained
+  evidence captured in earlier layers becomes entangled with later, more abstract
+  representations and is hard to recover from the final gist-token states.
+
+ComprExIT removes both by treating the **frozen LLM as a feature extractor** and performing
+explicit information transmission over its hidden states:
+
+- **Depth-wise transmission** — a token-conditioned gate aggregates each token's hidden states
+  from all layers into a *token anchor*, so features from intermediate layers stay directly
+  accessible.
+- **Width-wise transmission** — an optimal-transport plan (solved with Sinkhorn iterations)
+  globally coordinates how the token anchors are allocated to the compression slots.
+
+## 🏆 Highlights
+
+- 📈 **Stronger compression.** At ×4 compression on MRQA, ComprExIT beats the strongest
+  soft-compression baseline in average F1 by **+18.5%** (Llama-3.2-1B) and **+10.6%** (3B) on six
+  in-domain datasets, and by **+31.0%** / **+14.3%** on six out-of-domain datasets. In-domain, it
+  lands within 0.5 F1 of the *uncompressed* prompt-tuning baseline.
+- 🪶 **Lightweight.** The LLM stays frozen; ComprExIT adds only **~1%** trainable parameters.
+- ⚡ **Fast.** The compression stage is **more than 2× faster** than ICAE (0.18 s vs. 0.43 s at
+  512 tokens; 0.84 s vs. 1.93 s at 2,048 tokens).
+- 🧭 **Beyond QA.** It also beats the uncompressed baseline on XSum summarization and FEVER
+  fact-checking, and stays competitive on SST-2 in-context learning (see the paper's appendix).
+
+<details>
+<summary><b>Average EM / F1 on MRQA (×4 compression, 512-token context) — click to expand</b></summary>
+
+<br>
+
+| Method | 1B · in-domain | 1B · out-of-domain | 3B · in-domain | 3B · out-of-domain |
+|---|:---:|:---:|:---:|:---:|
+| *Prompt tuning (uncompressed reference)* | *55.72 / 66.72* | *48.78 / 59.40* | *62.28 / 73.35* | *57.24 / 67.68* |
+| ICAE | 44.16 / 56.16 | 29.89 / 38.94 | 53.23 / 65.92 | 41.54 / 51.93 |
+| 500x | 10.20 / 17.48 | 9.47 / 17.36 | 51.86 / 64.46 | 35.56 / 46.53 |
+| Activation Beacon | 14.78 / 25.11 | 18.57 / 27.75 | 29.75 / 39.64 | 33.21 / 42.77 |
+| **ComprExIT (ours)** | **52.34 / 66.55** | **38.38 / 51.00** | **59.02 / 72.88** | **47.19 / 59.34** |
+
+Each cell is the average over six datasets. In-domain: SQuAD, NewsQA, TriviaQA, SearchQA,
+HotpotQA, NaturalQuestions. Out-of-domain (unseen during training): BioASQ, DROP, DuoRC, RACE,
+RelationExtraction, TextbookQA. Per-dataset numbers are in the paper. You can reproduce the
+ComprExIT and ICAE rows from the released weights with [Track A](#track-a-evaluate-a-released-checkpoint).
+
+</details>
 
 ---
 
@@ -141,7 +223,8 @@ hf download Jiang-nan/comprexit-mrqa     --repo-type dataset --local-dir "$DATA_
 hf download Jiang-nan/comprexit-mrqa-ood --repo-type dataset --local-dir "$DATA_DIR/mrqa_ood"
 ```
 
-**A.3 — Run evaluation** (in-domain → Tables 1–2, out-of-domain → Table 5):
+**A.3 — Run evaluation** (in-domain → the paper's main results table; out-of-domain → the
+out-of-domain MRQA table in the appendix):
 
 ```bash
 # In-domain
@@ -344,17 +427,15 @@ Two kinds of paths, handled differently:
 
 ## Citation
 
-If you find this work useful, please cite:
+If you find ComprExIT useful in your research, please cite our NeurIPS 2026 paper:
 
 ```bibtex
-@misc{ye2026fixstructuralbottleneckcontext,
-      title={Fix the Structural Bottleneck: Context Compression via Explicit Information Transmission}, 
-      author={Jiangnan Ye and Hanqi Yan and Zhenyi Shen and Heng Chang and Ye Mao and Yulan He},
-      year={2026},
-      eprint={2602.03784},
-      archivePrefix={arXiv},
-      primaryClass={cs.CL},
-      url={https://arxiv.org/abs/2602.03784}, 
+@inproceedings{ye2026fixstructuralbottleneckcontext,
+  title     = {Fix the Structural Bottleneck: Context Compression via Explicit Information Transmission},
+  author    = {Ye, Jiangnan and Yan, Hanqi and Shen, Zhenyi and Chang, Heng and Mao, Ye and He, Yulan},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+  year      = {2026},
+  url       = {https://arxiv.org/abs/2602.03784}
 }
 ```
 
